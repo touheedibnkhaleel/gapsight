@@ -5,7 +5,7 @@
  * All errors will appear there.
  */
  
-const API_URL = "https://gapsight-backend.onrender.com/analyze"; 
+const API_URL = "https://gapsight-szx4.onrender.com/analyze"; 
 // ── Current mode (url or manual) ──────────────────────────────────────────────
 let currentMode = "url";
  

@@ -8,8 +8,8 @@ GapSight analyzes product reviews from Product Hunt and Trustpilot to surface bl
 
 ## Live Demo
 
-- **Frontend:** https://gapsight.vercel.app
-- **Backend API:** https://gapsight-backend.onrender.com
+- **Frontend:** https://gapsight-orpin.vercel.app/
+- **Backend API:** https://gapsight-szx4.onrender.com/
 
 ---
 

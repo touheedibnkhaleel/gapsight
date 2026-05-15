@@ -250,14 +250,12 @@ def scrape_product_hunt(url: str) -> dict:
 def scrape_trustpilot(url):
     domain = url.split("/review/")[-1].strip("/")
     SERPAPI_KEY = os.getenv("SERPAPI_KEY", "")
-    
     try:
-        # Search Google for reviews of this company on Trustpilot
         resp = requests.get(
             "https://serpapi.com/search",
             params={
                 "engine": "google",
-                "q": f"site:trustpilot.com {domain} reviews",
+                "q": f"{domain} reviews site:trustpilot.com",
                 "api_key": SERPAPI_KEY,
                 "num": 10,
             },
@@ -265,29 +263,25 @@ def scrape_trustpilot(url):
         )
         resp.raise_for_status()
         data = resp.json()
-
-        # Extract snippets from search results as reviews
         reviews = []
         for result in data.get("organic_results", []):
             snippet = result.get("snippet", "").strip()
             if snippet and len(snippet) > 30:
                 reviews.append(snippet)
-
         if not reviews:
             raise HTTPException(422, "No reviews found. Use Enter Manually instead.")
-
         return {
             "product_name": domain,
             "product_description": f"Trustpilot reviews for {domain}",
             "reviews": reviews[:20],
-            "source": "Trustpilot via Google",
+            "source": "Trustpilot",
         }
-
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(400, f"Error fetching reviews: {str(e)}")
-        
+        raise HTTPException(400, f"Could not fetch reviews: {str(e)}")
+
+
 def scrape_url(url: str) -> dict:
     # ── Auto-fix common URL mistakes ──────────────────────────────────────────
     url = url.strip()

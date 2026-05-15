@@ -248,50 +248,46 @@ def scrape_product_hunt(url: str) -> dict:
 
 
 def scrape_trustpilot(url):
-    # Extract domain from URL
-    # e.g. https://www.trustpilot.com/review/notion.so → notion.so
     domain = url.split("/review/")[-1].strip("/")
-    
     SERPAPI_KEY = os.getenv("SERPAPI_KEY", "")
     
     try:
+        # Search Google for reviews of this company on Trustpilot
         resp = requests.get(
             "https://serpapi.com/search",
             params={
-                "engine": "trustpilot",
-                "domain": domain,
+                "engine": "google",
+                "q": f"site:trustpilot.com {domain} reviews",
                 "api_key": SERPAPI_KEY,
+                "num": 10,
             },
             timeout=15,
         )
         resp.raise_for_status()
         data = resp.json()
-        
-        # Extract reviews from response
+
+        # Extract snippets from search results as reviews
         reviews = []
-        for review in data.get("reviews", []):
-            text = review.get("text", "").strip()
-            if text and len(text) > 20:
-                reviews.append(text)
-                
+        for result in data.get("organic_results", []):
+            snippet = result.get("snippet", "").strip()
+            if snippet and len(snippet) > 30:
+                reviews.append(snippet)
+
         if not reviews:
-            raise HTTPException(422, "No reviews found. Try Enter Manually instead.")
-            
-        # Get company name
-        product_name = data.get("company", {}).get("name", domain)
-        
+            raise HTTPException(422, "No reviews found. Use Enter Manually instead.")
+
         return {
-            "product_name": product_name,
-            "product_description": f"Reviews from Trustpilot for {product_name}",
-            "reviews": reviews[:25],
-            "source": "Trustpilot via SerpApi",
+            "product_name": domain,
+            "product_description": f"Trustpilot reviews for {domain}",
+            "reviews": reviews[:20],
+            "source": "Trustpilot via Google",
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(400, f"SerpApi error: {e}")
-
+        raise HTTPException(400, f"Error fetching reviews: {str(e)}")
+        
 def scrape_url(url: str) -> dict:
     # ── Auto-fix common URL mistakes ──────────────────────────────────────────
     url = url.strip()

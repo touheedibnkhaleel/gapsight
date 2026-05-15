@@ -34,7 +34,11 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://gapsight-orpin.vercel.app",
+        "http://localhost:3000",
+        "*"
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -243,66 +247,50 @@ def scrape_product_hunt(url: str) -> dict:
             "reviews": reviews, "source": "Product Hunt"}
 
 
-def scrape_trustpilot(url: str) -> dict:
+def scrape_trustpilot(url):
+    # Extract domain from URL
+    # e.g. https://www.trustpilot.com/review/notion.so → notion.so
+    domain = url.split("/review/")[-1].strip("/")
+    
+    SERPAPI_KEY = os.getenv("SERPAPI_KEY", "")
+    
     try:
-        resp = requests.get(url, headers=BROWSER_HEADERS, timeout=15)
-        resp.raise_for_status()
-    except requests.RequestException as e:
-        raise HTTPException(400, f"Could not load Trustpilot page: {e}")
-
-    soup = BeautifulSoup(resp.text, "html.parser")
-
-    # Company name
-    product_name = "Unknown Company"
-    h1 = soup.find("h1")
-    if h1:
-        product_name = h1.get_text(strip=True)
-
-    reviews = []
-
-    # Method 1: Trustpilot review attribute
-    for tag in soup.find_all("p", attrs={"data-service-review-text-typography": True}):
-        text = tag.get_text(strip=True)
-        if len(text) > 20:
-            reviews.append(text)
-
-    # Method 2: JSON-LD structured data
-    for script in soup.find_all("script", type="application/ld+json"):
-        try:
-            data  = json.loads(script.string or "")
-            items = data if isinstance(data, list) else [data]
-            for item in items:
-                for review in item.get("review", []):
-                    body = review.get("reviewBody", "").strip()
-                    if body and len(body) > 20:
-                        reviews.append(body)
-        except Exception:
-            continue
-
-    # Method 3: Generic paragraph fallback
-    if not reviews:
-        raw = [p.get_text(strip=True) for p in soup.find_all("p")]
-        reviews = clean_reviews(raw)
-
-    # Deduplicate
-    seen, unique = set(), []
-    for r in reviews:
-        if r not in seen:
-            seen.add(r)
-            unique.append(r)
-    reviews = unique[:25]
-
-    if not reviews:
-        raise HTTPException(
-            422,
-            "Could not extract reviews from this Trustpilot URL — the page may have bot protection. "
-            "Please switch to 'Enter Manually' and paste the reviews yourself."
+        resp = requests.get(
+            "https://serpapi.com/search",
+            params={
+                "engine": "trustpilot",
+                "domain": domain,
+                "api_key": SERPAPI_KEY,
+            },
+            timeout=15,
         )
-
-    return {"product_name": product_name,
+        resp.raise_for_status()
+        data = resp.json()
+        
+        # Extract reviews from response
+        reviews = []
+        for review in data.get("reviews", []):
+            text = review.get("text", "").strip()
+            if text and len(text) > 20:
+                reviews.append(text)
+                
+        if not reviews:
+            raise HTTPException(422, "No reviews found. Try Enter Manually instead.")
+            
+        # Get company name
+        product_name = data.get("company", {}).get("name", domain)
+        
+        return {
+            "product_name": product_name,
             "product_description": f"Reviews from Trustpilot for {product_name}",
-            "reviews": reviews, "source": "Trustpilot"}
-
+            "reviews": reviews[:25],
+            "source": "Trustpilot via SerpApi",
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(400, f"SerpApi error: {e}")
 
 def scrape_url(url: str) -> dict:
     # ── Auto-fix common URL mistakes ──────────────────────────────────────────

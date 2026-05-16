@@ -249,7 +249,7 @@ def scrape_product_hunt(url: str) -> dict:
 
 def scrape_trustpilot(url):
     domain = url.split("/review/")[-1].strip("/")
-    SERPAPI_KEY = os.getenv("SERPAPI_KEY", 2502295d00ebea6172de12f0ea0f9660aebbf1e99debe94f995d7c4eca3e023b"").strip()
+    SERPAPI_KEY = os.getenv("SERPAPI_KEY", "ea188a53e06708965ca315f30ec5041974437880a3464ca4447a5dc2132b4cb1").strip()
     try:
         resp = requests.get(
             "https://serpapi.com/search",

@@ -5,7 +5,7 @@
  * All errors will appear there.
  */
  
-const API_URL = "https://gapsight-szx4.onrender.com/analyze"; 
+const API_URL = "https://gapsight-backend.onrender.com/analyze"; 
 // ── Current mode (url or manual) ──────────────────────────────────────────────
 let currentMode = "url";
  
@@ -136,8 +136,7 @@ async function runAnalysis() {
  
     if (err.message.includes("Failed to fetch")) {
       showError(
-        "Cannot reach backend. Make sure uvicorn is running at http://localhost:8000 " +
-        "(check Terminal 1 is still open with the server running)"
+        "Cannot reach backend. Make sure the Render backend is running at https://gapsight-backend.onrender.com"
       );
     } else {
       showError(`Error: ${err.message}`);
@@ -251,10 +250,37 @@ function markStep(id, state) {
  
 // ── Reset ─────────────────────────────────────────────────────────────────────
 function resetForm() {
+  // Hide results and loading
   document.getElementById("results").style.display          = "none";
   document.getElementById("loading-section").style.display  = "none";
+
+  // Show form
   document.getElementById("form-section").style.display     = "flex";
+
+  // Clear all input fields
+  const urlInput = document.getElementById("product-url");
+  const descInput = document.getElementById("product-desc");
+  const revsInput = document.getElementById("reviews-input");
+  if (urlInput)  urlInput.value  = "";
+  if (descInput) descInput.value = "";
+  if (revsInput) revsInput.value = "";
+
+  // Clear result lists
+  ["blind-spots-list","weak-signals-list","opportunities-list","strategic-insights-list"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = "";
+  });
+
+  // Reset loading steps
   ["step-1","step-2","step-3","step-4"].forEach(id => markStep(id, ""));
+
+  // Clear errors
+  hideError();
+
+  // Switch back to URL mode
+  switchMode("url");
+
+  // Scroll to top
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
  

@@ -5,7 +5,7 @@
  * All errors will appear there.
  */
  
-const API_URL = "https://gapsight-backend.onrender.com/analyze"; 
+const API_URL = "https://gapsight-szx4.onrender.com/analyze"; 
 // ── Current mode (url or manual) ──────────────────────────────────────────────
 let currentMode = "url";
  
@@ -136,7 +136,7 @@ async function runAnalysis() {
  
     if (err.message.includes("Failed to fetch")) {
       showError(
-        "Cannot reach backend. Make sure the Render backend is running at https://gapsight-backend.onrender.com"
+        "Cannot reach backend. Make sure the Render backend is running at https://gapsight-szx4.onrender.com"
       );
     } else {
       showError(`Error: ${err.message}`);

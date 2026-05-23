@@ -10,7 +10,7 @@ OPENROUTER_URL     = "https://openrouter.ai/api/v1/chat/completions"
 
 # SerpApi — fallback hardcoded for Render until env var is confirmed working
 _serpapi_env = os.getenv("SERPAPI_KEY", "")
-SERPAPI_KEY  = "".join(_serpapi_env.split()) if _serpapi_env else "ec462bb092c93e5a7408a0a66f8c16c0a138fa178840dc9e85bb8e85e29a8b05"
+SERPAPI_KEY  = "".join(_serpapi_env.split()) if _serpapi_env else "2832e50a33d90d9b774d77ec13a6c1149ce6cc75bc08f64c080dd4aa8160036a"
 
 FREE_MODELS = [
     "openrouter/auto",

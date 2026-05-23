@@ -68,7 +68,21 @@ async function runAnalysis() {
     if (!rawRevs) { showError("Please paste at least one review."); return; }
     const reviews = rawRevs.split("\n").map(r => r.trim()).filter(r => r.length > 0);
     if (reviews.length === 0) { showError("No valid reviews found."); return; }
-    body = { product_description: desc, reviews };
+
+    // Basic quality check — each review must have at least 3 words
+    const validReviews = reviews.filter(r => r.split(" ").length >= 3 && r.length >= 20);
+    if (validReviews.length === 0) {
+      showError("Reviews don\'t look valid. Please paste real user reviews — proper sentences, not random text.");
+      return;
+    }
+
+    // Description quality check
+    if (desc.split(" ").length < 3) {
+      showError("Product description is too short. Please describe your product properly.");
+      return;
+    }
+
+    body = { product_description: desc, reviews: validReviews };
   }
 
   console.log("📤 Sending to backend...");

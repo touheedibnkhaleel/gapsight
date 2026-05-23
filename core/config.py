@@ -1,21 +1,14 @@
-"""
-Core configuration — loads all environment variables from .env
-Never hardcode secrets. Always use os.getenv() here.
-"""
-
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Explicitly point to .env file location
+load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
-# OpenRouter API
 OPENROUTER_API_KEY = "".join(os.getenv("OPENROUTER_API_KEY", "").split())
 OPENROUTER_URL     = "https://openrouter.ai/api/v1/chat/completions"
+SERPAPI_KEY        = "".join(os.getenv("SERPAPI_KEY", "").split())
 
-# SerpApi
-SERPAPI_KEY = "".join(os.getenv("SERPAPI_KEY", "").split())
-
-# Free models tried in order — if one fails, next is used automatically
 FREE_MODELS = [
     "openrouter/auto",
     "meta-llama/llama-3.3-70b-instruct:free",

@@ -1,7 +1,6 @@
 """
 GapSight — main.py
-App entry point only. Creates app, registers middleware, includes router.
-All logic lives in api/, services/, models/, core/.
+Entry point only. Creates app, registers middleware, includes router.
 """
 
 from fastapi import FastAPI
